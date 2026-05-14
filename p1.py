@@ -109,5 +109,4 @@ ax2.set_ylim(-190, 190)          # Show standard wrapping limits
 ax2.grid(True, linestyle='--', alpha=0.6)
 
 plt.tight_layout()
-fig.savefig('fig-p1-4.eps')
 plt.show()
