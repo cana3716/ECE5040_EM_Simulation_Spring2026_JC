@@ -247,18 +247,21 @@ ax.set_ylabel(r'$E_z/Ez_{z_{max}}$')
 ax.legend()
 ax.grid()
 plt.tight_layout()
-plt.savefig('fig-p8-3.eps'); 
+#plt.savefig('fig-p8-3.eps'); 
 
 # phase distribution of electric field across the horn
 fig, ax = plt.subplots(figsize=(8, 6))
-phi=np.linspace(0,180,n_steps)
-plt.plot(phi,np.angle(E_probe2,deg=True),c='r',label=r'$\angle{E_{probe_2}}$')
-ax.set_xlabel(r'$\phi$ (degrees)')
+freq=np.fft.fftfreq(len(E_probe2),d=1/2/f)
+window_mask=(freq>=0)&(freq<=20e9)
+freq_windowed=freq[window_mask]
+E_probe2_fd=np.fft.fft(E_probe2)
+plt.plot(freq_windowed/1e9,np.angle(E_probe2_fd[window_mask],deg=True),c='r',label=r'$\angle{E_{probe_2}}$')
+ax.set_xlabel(r'$f$ (GHz)')
 ax.set_ylabel(r'$\angle{E_z}$ (degrees)')
 ax.legend()
 ax.grid()
 plt.tight_layout()
-plt.savefig('fig-p8-4.eps'); 
+#plt.savefig('fig-p8-4.eps'); 
 
 # Electric field sampled at a point deep inside the PML 
 fig, ax = plt.subplots(figsize=(8, 6))
@@ -269,7 +272,6 @@ ax.set_ylabel(r'$E_z/Ez_{z_{max}}$')
 ax.legend()
 ax.grid()
 plt.tight_layout()
-
 
 plt.show()
 
