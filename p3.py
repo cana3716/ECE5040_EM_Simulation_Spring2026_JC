@@ -268,7 +268,6 @@ ax.set_xlabel(r'$t_n$')
 ax.set_ylabel(r'$E(t)\text{ V/m}$')
 ax.legend()
 ax.grid()
-plt.savefig('fig-p3-2.eps')
 
 fig, ax = plt.subplots(figsize=(7, 6))
 tn=np.linspace(0,n_steps,len(Einc))
@@ -280,7 +279,6 @@ ax.set_xlabel(r'$t_n$')
 ax.set_ylabel(r'$H(t)\text{ A/m}$')
 ax.legend()
 ax.grid()
-plt.savefig('fig-p3-3.eps')
 
 fig, ax = plt.subplots(figsize=(7, 6))
 ax.plot(freqs/1e9,S11_mag, c='b', linestyle='--',label=r'$|S_{11}|$')
@@ -293,7 +291,6 @@ ax.set_ylabel(r'$|S|$')
 ax.set_xlim(8,12)
 ax.legend()
 ax.grid()
-plt.savefig('fig-p3-4.eps')
 
 plt.show()
 
