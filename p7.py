@@ -222,7 +222,6 @@ ax.grid()
 plt.tight_layout()
 #plt.savefig('fig-p7-3.eps'); 
 
-
 # Electic field sampled at a point deep inside the PML 
 fig, ax = plt.subplots(figsize=(8, 6))
 t=np.arange(len(E_probe3))
