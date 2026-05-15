@@ -1,13 +1,20 @@
 # ECE5040_EM_Simulation_Spring2026_JC
 
+# Project Description
+
+This is a respository of Python source files of 1D/2D FDTD simulations/experiments of basic PEC, SOI, and aperature antenna waveguides. 
+
+Source files p1.py, p2.py, and p3.py pertain to PEC waveguides. 
+Source files p4.py p5.py, and p6.py pertain to SOI interfaces and slabs.
+Source files p7.py and p8.py pertain to PEC slit and a flared horn antenna repsectively. 
+
 # Acknowledgment: 
 
 This project was developed as part of the course requirements for ECE 5040, EM
 Simulation, offered in Spring 2026 at the University of Idaho.
 
-# Project Description
-
 # References
+
 [1] C. A. Balanis, Advanced Engineering Electromagnetics. John Wiley & Sons,
     Inc., New York, 2nd ed, 2012.  
 
