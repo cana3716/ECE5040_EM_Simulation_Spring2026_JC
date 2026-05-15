@@ -5,6 +5,8 @@
 This project was developed as part of the course requirements for ECE 5040, EM
 Simulation, offered in Spring 2026 at the University of Idaho.
 
+# Project Description
+
 # References
 [1] C. A. Balanis, Advanced Engineering Electromagnetics. John Wiley & Sons,
     Inc., New York, 2nd ed, 2012.  
