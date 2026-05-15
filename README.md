@@ -2,7 +2,7 @@
 
 # Project Description
 
-This is a repository of Python source files of 1D/2D FDTD simulations/experiments of basic PEC, SOI, and aperture antenna waveguides. 
+This is a repository of Python source files for 1D/2D FDTD simulations/experiments of basic PEC, SOI, and aperture antenna waveguides. 
 
 Source files p1.py, p2.py, and p3.py pertain to PEC waveguides. 
 
