@@ -22,8 +22,8 @@ Simulation, offered in Spring 2026 at the University of Idaho.
 [1] C. A. Balanis, Advanced Engineering Electromagnetics. John Wiley & Sons,
     Inc., New York, 2nd ed, 2012.  
 
-[2] J. B. Schneider, Understanding the Finite-Difference Time-Domain Method.
-    April 17, 2025. 
+[2] J. B. Schneider, Understanding the Finite-Difference Time-Domain Method. 
+    Retrieved April 17, 2026, from https://eecs.wsu.edu/~schneidj/ufdtd/ufdtd.pdf
 
 [3] D. M. Pozar, Microwave Engineering. John Wiley & Sons, Inc., 4th ed, 2012. 
 
