@@ -1,11 +1,10 @@
-# p7.py, ECE5040-ES Final Project, Problem 7 
+# p8.py, ECE5040-ES Final Project, Problem 8 
 #
-# Description: Create a 2D domain separated into two halves by a PEC
-# wall with a central slit excited with a localized current source.
-# UPML or CPML outer boundaries simulate free-space radiation 
-# without reflection. 
-#
-# Ref [2]. J. B. Schneider, Understanding the Finite-Difference Time-Domain # Method, April 17, 2025
+# Combine waveguide structures and radiation boundaries by
+# simulating a parallel-plate waveguide that gradually
+# flares outward into a horn. Waveguide is fed with the
+# fundamental mode. Surrounding domain is terminated with
+# a robust PML. 
 #
 import numpy as np
 import matplotlib.pyplot as plt
@@ -29,7 +28,7 @@ t0 = 3.0 * tau              # Pulse delay to ensure a smooth turn-on
 source_amplitude = 1.0      # Peak amplitude of the source
 
 ## Grid Parameters
-Nx, Ny = 1000, 1000         # Nx x Ny cells grid
+Nx, Ny = 500, 500         # Nx x Ny cells grid
 dl = lambda_0 / 20         # Spatial resolution (dx = dy). 20 points per wavelength
 dx=dy=dl
 print('dx/(2*sqrt(c))=%4.3E ' % (dl/(2*np.sqrt(c))))
@@ -71,10 +70,19 @@ ic, jc = Nx // 2, Ny // 2
 dt = (dl / (np.sqrt(2.0) * c)) * 0.99  # Time step slightly below Courant limit
 print('dt=',dt)
 
-### PEC Slit Aperture Parameters
-slit_width=20
-slit_x=ic
-slit_y=jc
+### PEC waveguide with outward flares 
+origin_x,origin_y=ic-100,jc
+l1,h1,phi_horn=100,10,45*np.pi/180
+l2=round(0.5*l1)
+h2=l2*np.tan(phi_horn)
+
+p1=(origin_x,origin_y+h1)
+p2=(origin_x+l1,origin_y+h1)
+p3=(origin_x+l1+l2,origin_y+h1+h2)
+
+p4=(origin_x,origin_y-h1)
+p5=(origin_x+l1,origin_y-h1)
+p6=(origin_x+l1+l2,origin_y-h1-h2)
 
 n_steps = 2400 
 
@@ -124,26 +132,44 @@ for n in range(n_steps):
     Dz[1:-1, 1:-1] = ca_y[1:-1, 1:-1] * Dz[1:-1, 1:-1] + cb_y[1:-1, 1:-1] * curl_h 
     Ez[1:-1, 1:-1] = ca_x[1:-1, 1:-1] * Ez[1:-1, 1:-1] + (1.0 / eps0) * (Dz[1:-1, 1:-1] - Dz_old[1:-1, 1:-1])
     
-    # PEC Boundary
-    Ez[slit_x,(slit_y+slit_width//2):Ny]=0.0
-    Ez[slit_x,1:(slit_y-slit_width//2)]=0.0
-   
-    # Measurements
-    E_probe1[n]=Ez[slit_x,slit_y]
+    ### PEC Waveguide Boundaries
+    Ez[p1[0]:p2[0],p1[1]]=0.0 # upper horizontal boundary 
+
+    # upper horn boundary
+    x_horn,y_horn=p2[0],p2[1]
+    z_horn=np.sqrt(h2**2+l2**2)
+    #dx_horn,dy_horn=z_horn*np.cos(phi_horn),z_horn*np.sin(phi_horn)
+    dx_horn,dy_horn=1,1
+    for i in range(p3[0]-p2[0]): 
+        Ez[x_horn,y_horn]=0.0
+        x_horn+=dx_horn
+        y_horn+=dy_horn
+
+    Ez[p4[0]:p5[0],p5[1]]=0.0 # lower horizontal boundary
+
+    # lower horn boundary 
+    x_horn,y_horn=p5[0],p5[1]
+    for i in range(p6[0]-p5[0]): 
+        Ez[x_horn,y_horn]=0.0
+        x_horn+=1
+        y_horn-=1
+
+    ### Measurements
+    E_probe1[n]=Ez[p3[0],ic]
     E_probe3[n]=Ez[Nx-50,jc]
-    if (n==2300): 
+    if (n==round(0.96*n_steps)): 
         i=0
         for phi in phi_probe:
             probe_x=round(r_probe*np.cos(phi))
             probe_y=round(r_probe*np.sin(phi))
-            E_probe2[i]=Ez[slit_x+probe_x,slit_y+probe_y]
+            E_probe2[i]=Ez[p3[0]+probe_x,jc+probe_y]
             i+=1
 
     Dz_old[1:-1, 1:-1] = Dz[1:-1, 1:-1].copy()
    
     # Source
     t = n * dt
-    Ez[Nx//6, jc] += source_amplitude * np.exp(-((t - t0) / tau)**2) # += gives soft source
+    Ez[origin_x, origin_y] += source_amplitude * np.exp(-((t - t0) / tau)**2) # += gives soft source
 
     # Save frame and track global maximum
     if n % steps_per_frame == 0:
@@ -161,15 +187,14 @@ for n in range(n_steps):
         print('E_probe1_max=%4.3e' % (np.max(E_probe1)))
         print('E_probe2_max=%4.3e' % (np.max(E_probe2)))
         print('E_probe3_max=%4.3e' % (np.max(E_probe3)))
+       # print('ca_x_max=%4.3e' % (np.max(ca_x)))
+       # print('ca_y_max=%4.3e' % (np.max(ca_y)))
 
-# =========================================
 # Setup Visualization & Animation
-# =========================================
-
 print("Setting up visualization...")
 fig, ax = plt.subplots(figsize=(7, 6))
-point_list1=[(slit_x,slit_y+slit_width//2),(slit_x,slit_y+Ny//2)] # upper PEC boundary
-point_list2=[(slit_x,slit_y-slit_width//2),(slit_x,slit_y-Ny//2)] # lower PEC boundary
+point_list1=[p1,p2,p3] # upper PEC boundary
+point_list2=[p4,p5,p6] # lower PEC boundary
 original1=LineString(point_list1)
 original2=LineString(point_list2)
 ax.plot(*original1.xy,color='black')
@@ -199,15 +224,17 @@ print("Simulation complete.")
 plt.show()
 
 # Electric field sampled directly across the aperture plane
-fig, ax = plt.subplots(figsize=(8, 6))
-t=np.arange(len(E_probe1))
-plt.plot(t,E_probe1,c='b',label='$E_{probe_1}$')
-ax.set_xlabel(r'$t$')
-ax.set_ylabel(r'$E_z$ (V/m)')
-ax.legend()
-ax.grid()
-plt.tight_layout()
-#plt.savefig('fig-p7-2.eps'); 
+#fig, ax = plt.subplots(figsize=(8, 6))
+#t=np.arange(len(E_probe1))
+#plt.plot(t,E_probe1,c='b',label='$E_{probe_1}$')
+#ax.set_xlim(180,200)
+#ax.set_ylim(0.2,0.65)
+#ax.set_xlabel(r'$t$')
+#ax.set_ylabel(r'$E_z$ (V/m)')
+#ax.legend()
+#ax.grid()
+#plt.tight_layout()
+#plt.savefig('fig-p8-2.eps'); 
 
 # Un-calibrated far-field radiation pattern (polar plot) 
 # calculated by sampling the fields in a semi-circle
@@ -216,23 +243,22 @@ fig, ax = plt.subplots(figsize=(8, 6))
 phi=np.linspace(0,180,n_steps)
 plt.plot(phi,E_probe2/np.max(E_probe2),c='r',label='$E_{probe_2}$')
 ax.set_xlabel(r'$\phi$ (degrees)')
-ax.set_ylabel(r'$E_z/E_{z_{max}}$ ')
+ax.set_ylabel(r'$E_z/Ez_{z_{max}}$')
 ax.legend()
 ax.grid()
 plt.tight_layout()
-#plt.savefig('fig-p7-3.eps'); 
+#plt.savefig('fig-p8-3.eps'); 
 
-
-# Electic field sampled at a point deep inside the PML 
+# Electric field sampled at a point deep inside the PML 
 fig, ax = plt.subplots(figsize=(8, 6))
 t=np.arange(len(E_probe3))
-plt.plot(t,E_probe3/np.max{E_probe3},c='g',label='$E_{probe_3}$')
+plt.plot(t,E_probe3/np.max(E_probe3),c='g',label='$E_{probe_3}$')
 ax.set_xlabel(r'$t$')
-ax.set_ylabel(r'$E_z/E_{z_{max}}$ (V/m)')
+ax.set_ylabel(r'$E_z/Ez_{z_{max}}$')
 ax.legend()
 ax.grid()
 plt.tight_layout()
-#plt.savefig('fig-p7-4.eps'); 
+#plt.savefig('fig-p8-4.eps'); 
 
 plt.show()
 
